@@ -46,35 +46,35 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		//Midle of side
 		for(int i=0;i<200;i++) {
 			for(int j=0;j<200;j++) {
-				cubeSide[i*200+j] = ((200-j)<<16)+((200-j)<<8)+(200-j);
+				cubeSide[i*200+j] = ((200)<<16)+((200)<<8)+(200);
 			}
 		}
 		
 		//Top
 		for(int i=0;i<5;i++) {
 			for(int j=0;j<200;j++) {
-				cubeSide[j+i*200] = ((255)<<16)+((255)<<8)+(255);
+				cubeSide[j+i*200] = ((0)<<16)+((0)<<8)+(0);
 			}
 		}
 		
 		//Right
 		for(int i=0;i<200;i++) {
 			for(int j=195;j<200;j++) {
-				cubeSide[j+i*200] = ((255)<<16)+((255)<<8)+(255);
+				cubeSide[j+i*200] = ((0)<<16)+((0)<<8)+(0);
 			}
 		}
 		
 		//Bottom
 		for(int i=195;i<200;i++) {
 			for(int j=0;j<200;j++) {
-				cubeSide[j+i*200] = ((255)<<16)+((255)<<8)+(255);
+				cubeSide[j+i*200] = ((0)<<16)+((0)<<8)+(0);
 			}
 		}
 		
 		//Left
 		for(int i=0;i<200;i++) {
 			for(int j=0;j<5;j++) {
-				cubeSide[j+i*200] = ((255)<<16)+((255)<<8)+(255);
+				cubeSide[j+i*200] = ((0)<<16)+((0)<<8)+(0);
 			}
 		}
 		
@@ -116,17 +116,26 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 			}
 		}
 		
-		double[][] cube = getCube(-2, 0, 1);
-		drawTopSide(cube);
-		drawBottomSide(cube);
-		drawLeftSide(cube);
-		drawRightSide(cube);
-		drawNearSide(cube);
+		double[][] cube;
+		for(int i=0;i<4;i++) {
+			cube = getCube(-2, 0, 1+i*1.5);
+			if(Xmove<cube[0][0])
+				drawLeftSide(cube);
+			if(Xmove>cube[6][0])
+				drawRightSide(cube);
+			if(Ymove>cube[5][1])
+				drawTopSide(cube);
+			if(Ymove<cube[0][1])
+				drawBottomSide(cube);
+			drawNearSide(cube);
+		}
+		
+		for(int i=0;i<4;i++) {
+			cube = getCube(1, 0, 1+i*1.5);
+			makeCube(cube,img.getGraphics());
+		}
 		
 		g.drawImage(img, 0, 0, null);
-		
-		cube = getCube(1, 0, 1);
-		makeCube(cube,g);
 		
 		endTime = System.currentTimeMillis();
 		if(endTime-startTime>1000) {
@@ -138,6 +147,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Times New Roman",Font.BOLD,25));
 		g.drawString(""+currFrames+" fps", 10, 35);
+		g.drawString("X: "+Xmove, 10, 55);
+		g.drawString("Y: "+Ymove, 10, 75);
+		g.drawString("Z: "+Zmove, 10, 95);
 		
 		g.dispose();
 		bs.show();
@@ -174,14 +186,18 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 				}
 				
 				//Translate X & Y
-				Xpix = (toDraw[4][0]+Xmove+xx)/Zpix + WIDTH/2;
-				Ypix = -(toDraw[4][1]+Ymove)/Zpix + HEIGHT/2;
+				Xpix = (toDraw[4][0]-Xmove+xx)/Zpix + WIDTH/2;
+				Ypix = -(toDraw[4][1]-Ymove)/Zpix + HEIGHT/2;
 				
 				if(Xpix>=WIDTH || Xpix<=0 || Ypix>=HEIGHT || Ypix<=0)
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200];
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					
+					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
 				}
 			}
@@ -201,14 +217,18 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 				}
 				
 				//Translate X & Y
-				Xpix = (toDraw[3][0]+Xmove+xx)/Zpix + WIDTH/2;
-				Ypix = -(toDraw[3][1]+Ymove)/Zpix + HEIGHT/2;
+				Xpix = (toDraw[3][0]-Xmove+xx)/Zpix + WIDTH/2;
+				Ypix = -(toDraw[3][1]-Ymove)/Zpix + HEIGHT/2;
 				
 				if(Xpix>=WIDTH || Xpix<=0 || Ypix>=HEIGHT || Ypix<=0)
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200];
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					
+					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
 				}
 			}
@@ -228,14 +248,18 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 				}
 				
 				//Translate X & Y
-				Xpix = (toDraw[5][0]+Xmove-xx)/Zpix + WIDTH/2;
-				Ypix = -(toDraw[5][1]+Ymove-yy)/Zpix + HEIGHT/2;
+				Xpix = (toDraw[5][0]-Xmove-xx)/Zpix + WIDTH/2;
+				Ypix = -(toDraw[5][1]-Ymove-yy)/Zpix + HEIGHT/2;
 				
 				if(Xpix>=WIDTH || Xpix<=0 || Ypix>=HEIGHT || Ypix<=0)
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[199-xx+yy*200];
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					
+					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[199-xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
 				}
 			}
@@ -256,14 +280,18 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 				
 				
 				//Translate X & Y
-				Xpix = (toDraw[7][0]+Xmove)/Zpix + WIDTH/2;
-				Ypix = -(toDraw[7][1]+Ymove-yy)/Zpix + HEIGHT/2;
+				Xpix = (toDraw[7][0]-Xmove)/Zpix + WIDTH/2;
+				Ypix = -(toDraw[7][1]-Ymove-yy)/Zpix + HEIGHT/2;
 				
 				if(Xpix>=WIDTH || Xpix<=0 || Ypix>=HEIGHT || Ypix<=0)
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200];
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					
+					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
 				}
 			}
@@ -284,14 +312,18 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 				
 				
 				//Translate X & Y
-				Xpix = (toDraw[5][0]+Xmove)/Zpix + WIDTH/2;
-				Ypix = -(toDraw[5][1]+Ymove-yy)/Zpix + HEIGHT/2;
+				Xpix = (toDraw[5][0]-Xmove)/Zpix + WIDTH/2;
+				Ypix = -(toDraw[5][1]-Ymove-yy)/Zpix + HEIGHT/2;
 				
 				if(Xpix>=WIDTH || Xpix<=0 || Ypix>=HEIGHT || Ypix<=0)
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200];
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					
+					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
 				}
 			}
@@ -314,8 +346,8 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		for(int i=0;i<8;++i) {
 			if(tempCube[i][2]==0)
 				continue;
-			tempCube[i][0] = (toDraw[i][0]+Xmove)/tempCube[i][2] + WIDTH/2;
-			tempCube[i][1] = -(toDraw[i][1]+Ymove)/tempCube[i][2] + HEIGHT/2;
+			tempCube[i][0] = (toDraw[i][0]-Xmove)/tempCube[i][2] + WIDTH/2;
+			tempCube[i][1] = -(toDraw[i][1]-Ymove)/tempCube[i][2] + HEIGHT/2;
 		}
 		
 		drawCube(tempCube, g);
@@ -368,16 +400,16 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
-			this.Xmove += 10;
-			break;
-		case KeyEvent.VK_RIGHT:
 			this.Xmove -= 10;
 			break;
+		case KeyEvent.VK_RIGHT:
+			this.Xmove += 10;
+			break;
 		case KeyEvent.VK_UP:
-			this.Ymove -= 10;
+			this.Ymove += 10;
 			break;
 		case KeyEvent.VK_DOWN:
-			this.Ymove += 10;
+			this.Ymove -= 10;
 			break;
 		case KeyEvent.VK_R:
 			Xmove=0;
@@ -387,14 +419,6 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		default:
 			break;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_LEFT)
-			this.Xmove += 10;
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT)
-			this.Xmove -= 10;
-		if(e.getKeyCode() == KeyEvent.VK_UP)
-			this.Ymove -= 10;
-		if(e.getKeyCode() == KeyEvent.VK_DOWN)
-			this.Ymove += 10;
 	}
 
 	@Override
