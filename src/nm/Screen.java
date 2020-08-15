@@ -354,22 +354,72 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	}
 	
 	private void drawCube(double[][] toDraw,Graphics g) {
-		g.setColor(Color.BLUE);
-		g.drawLine((int)toDraw[0][0], (int)toDraw[0][1], (int)toDraw[1][0], (int)toDraw[1][1]);// 1 2
-		g.setColor(Color.GREEN);
-		g.drawLine((int)toDraw[3][0], (int)toDraw[3][1], (int)toDraw[0][0], (int)toDraw[0][1]);// 4 1
-		g.setColor(Color.RED);
-		g.drawLine((int)toDraw[4][0], (int)toDraw[4][1], (int)toDraw[0][0], (int)toDraw[0][1]);// 5 1
-		g.setColor(Color.BLACK);
-		g.drawLine((int)toDraw[1][0], (int)toDraw[1][1], (int)toDraw[2][0], (int)toDraw[2][1]);// 2 3
-		g.drawLine((int)toDraw[2][0], (int)toDraw[2][1], (int)toDraw[3][0], (int)toDraw[3][1]);// 3 4
-		g.drawLine((int)toDraw[1][0], (int)toDraw[1][1], (int)toDraw[5][0], (int)toDraw[5][1]);// 2 6
-		g.drawLine((int)toDraw[2][0], (int)toDraw[2][1], (int)toDraw[6][0], (int)toDraw[6][1]);// 3 7
-		g.drawLine((int)toDraw[3][0], (int)toDraw[3][1], (int)toDraw[7][0], (int)toDraw[7][1]);// 4 8
-		g.drawLine((int)toDraw[5][0], (int)toDraw[5][1], (int)toDraw[6][0], (int)toDraw[6][1]);// 6 7
-		g.drawLine((int)toDraw[4][0], (int)toDraw[4][1], (int)toDraw[7][0], (int)toDraw[7][1]);// 5 8
-		g.drawLine((int)toDraw[7][0], (int)toDraw[7][1], (int)toDraw[6][0], (int)toDraw[6][1]);// 8 7
-		g.drawLine((int)toDraw[5][0], (int)toDraw[5][1], (int)toDraw[4][0], (int)toDraw[4][1]);// 6 5
+		drawLine(toDraw[0], toDraw[1], Color.BLUE.getRGB());// 1 2  X
+		drawLine(toDraw[3], toDraw[0], Color.GREEN.getRGB());// 4 1 Z
+		drawLine(toDraw[4], toDraw[0], Color.RED.getRGB());// 5 1 Y
+		drawLine(toDraw[1], toDraw[2], Color.BLACK.getRGB());// 2 3
+		drawLine(toDraw[2], toDraw[3], Color.BLACK.getRGB());// 3 4
+		drawLine(toDraw[1], toDraw[5], Color.BLACK.getRGB());// 2 6
+		drawLine(toDraw[2], toDraw[6], Color.BLACK.getRGB());// 3 7
+		drawLine(toDraw[3], toDraw[7], Color.BLACK.getRGB());// 4 8
+		drawLine(toDraw[5], toDraw[6], Color.BLACK.getRGB());// 6 7
+		drawLine(toDraw[4], toDraw[7], Color.BLACK.getRGB());// 5 8
+		drawLine(toDraw[7], toDraw[6], Color.BLACK.getRGB());// 8 7
+		drawLine(toDraw[5], toDraw[4], Color.BLACK.getRGB());// 6 5
+	}
+	
+	private void drawLine(double[] point1,double[] point2,int color) {
+		double minZpix = Math.min(point2[2], point1[2]);
+		double zPixdiff = Math.abs(point2[2]-point1[2]);
+		double zPixStep;
+		//x1<=x2
+		if(point1[0]<=point2[0]) {
+			//x1==x2
+			if(point2[0]==point1[0]) {
+				int i = (int) Math.min(point2[1],point1[1]);
+				int imax = (int) Math.max(point2[1],point1[1]);
+				zPixStep = zPixdiff/(imax-i);
+				for(;i<imax;i++) {
+					if((int)point2[0]>=WIDTH || (int)point2[0]<=0 || i>=HEIGHT || i<=0)
+						continue;
+					if(ZBuffer[(int)point2[0]+i*WIDTH]>=minZpix+i*zPixStep || ZBuffer[(int)point2[0]+i*WIDTH]==-1) {
+						imgPix[(int)point2[0]+i*WIDTH] = color;
+						ZBuffer[(int)point2[0]+i*WIDTH]=minZpix+i*zPixStep;
+					}
+				}
+			}else{
+				double k = (point2[1]-point1[1])/(point2[0]-point1[0]);
+				int n = (int)(point2[1]-k*point2[0]);
+				zPixStep = zPixdiff/(point2[0]-point1[0]);
+				for(int x=(int)point1[0];x<=(int)point2[0];x++) {
+					int y = (int)(x*k+n);
+					
+					if(x>=WIDTH || x<=0 || y>=HEIGHT || y<=0)
+						continue;
+					
+					if(ZBuffer[x+y*WIDTH]>=minZpix+x*zPixStep || ZBuffer[x+y*WIDTH]==-1) {
+						imgPix[x+y*WIDTH] = color;
+						ZBuffer[x+y*WIDTH]=minZpix+x*zPixStep;
+					}
+				}
+			}
+		}else {
+			double k = (point1[1]-point2[1])/(point1[0]-point2[0]);
+			int n = (int)(point1[1]-k*point1[0]);
+			
+			zPixStep = zPixdiff/(point1[0]-point2[0]);
+			for(int x=(int)point2[0];x<=(int)point1[0];x++) {
+				int y = (int)(x*k+n);
+				
+				if(x>=WIDTH || x<=0 || y>=HEIGHT || y<=0)
+					continue;
+				
+				if(ZBuffer[x+y*WIDTH]>=minZpix+x*zPixStep || ZBuffer[x+y*WIDTH]==-1) {
+					imgPix[x+y*WIDTH] = color;
+					ZBuffer[x+y*WIDTH]=minZpix+x*zPixStep;
+				}
+			}
+		}
 	}
 	
 	private int getColor(int r,int g,int b) {
