@@ -27,6 +27,7 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	private int[] cubeSide;
 	private int[] imgPix;
 	private double[] ZBuffer;
+	private double renderDistance = 2000;
 	
 	private JFrame frame;
 	private boolean running = false;
@@ -178,9 +179,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
+				if(toDraw[4][2]+yy-Zmove > renderDistance)
+					continue;
+				
 				//translate Z
-				double renderDis = HEIGHT/2;
-				Zpix = (renderDis+toDraw[4][2]+yy-Zmove)/(renderDis);
+				double horizont = HEIGHT/2;
+				Zpix = (horizont+toDraw[4][2]+yy-Zmove)/(horizont);
 				if(Zpix<=0) {
 					return;
 				}
@@ -193,9 +197,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
-					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
-					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/7.5)),cubeSide[xx+yy*200] & 255);
 					
 					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
@@ -209,9 +213,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
+				if(toDraw[4][2]-yy-Zmove > renderDistance)
+					continue;
+				
 				//translate Z
-				double renderDis = HEIGHT/2;
-				Zpix = (renderDis+toDraw[3][2]-yy-Zmove)/(renderDis);
+				double horizont = HEIGHT/2;
+				Zpix = (horizont+toDraw[3][2]-yy-Zmove)/(horizont);
 				if(Zpix<=0) {
 					return;
 				}
@@ -224,9 +231,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
-					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
-					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/7.5)),cubeSide[xx+yy*200] & 255);
 					
 					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
@@ -240,9 +247,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
+				if(toDraw[4][2]-Zmove > renderDistance)
+					continue;
+				
 				//translate Z
-				double renderDis = HEIGHT/2;
-				Zpix = ((renderDis+toDraw[5][2]-Zmove)/(renderDis));
+				double horizont = HEIGHT/2;
+				Zpix = ((horizont+toDraw[5][2]-Zmove)/(horizont));
 				if(Zpix<=0) {
 					return;
 				}
@@ -255,9 +265,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
-					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
-					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/7.5)),cubeSide[xx+yy*200] & 255);
 					
 					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[199-xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
@@ -271,9 +281,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
+				if(toDraw[4][2]-xx-Zmove > renderDistance)
+					continue;
+				
 				//translate Z
-				double renderDis = HEIGHT/2;
-				Zpix = ((renderDis+toDraw[7][2]-Zmove-xx)/(renderDis));
+				double horizont = HEIGHT/2;
+				Zpix = ((horizont+toDraw[7][2]-Zmove-xx)/(horizont));
 				if(Zpix<=0) {
 					return;
 				}
@@ -287,9 +300,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
-					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
-					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/7.5)),cubeSide[xx+yy*200] & 255);
 					
 					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
@@ -303,9 +316,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
+				if(toDraw[4][2]+xx-Zmove > renderDistance)
+					continue;
+				
 				//translate Z
-				double renderDis = HEIGHT/2;
-				Zpix = ((renderDis+toDraw[5][2]-Zmove+xx)/(renderDis));
+				double horizont = HEIGHT/2;
+				Zpix = ((horizont+toDraw[5][2]-Zmove+xx)/(horizont));
 				if(Zpix<=0) {
 					return;
 				}
@@ -319,9 +335,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 					continue;
 				
 				if(ZBuffer[(int)Xpix+(int)Ypix*WIDTH]>=Zpix || ZBuffer[(int)Xpix+(int)Ypix*WIDTH]==-1) {
-					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
-					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
-					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/5)),cubeSide[xx+yy*200] & 255);
+					int greyLevel = Math.min((int)(((cubeSide[xx+yy*200]>>16)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 16 & 255)<<16;
+					greyLevel += Math.min((int)(((cubeSide[xx+yy*200]>>8)&255)*(Zpix/7.5)),cubeSide[xx+yy*200] >> 8 & 255)<<8;
+					greyLevel += Math.min((int)((cubeSide[xx+yy*200]&255)*(Zpix/7.5)),cubeSide[xx+yy*200] & 255);
 					
 					imgPix[(int)Xpix+(int)Ypix*WIDTH] = cubeSide[xx+yy*200]-greyLevel;
 					ZBuffer[(int)Xpix+(int)Ypix*WIDTH]=Zpix;
@@ -334,9 +350,11 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		double[][] tempCube = new double[8][3];
 		
 		//translate Z
-		double renderDis = HEIGHT/2;
+		double horizont = HEIGHT/2;
+		if(toDraw[3][2]-Zmove > renderDistance)
+			return;
 		for(int i=0;i<8;++i) {
-			tempCube[i][2] = ((renderDis+toDraw[i][2]-Zmove)/(renderDis));
+			tempCube[i][2] = ((horizont+toDraw[i][2]-Zmove)/(horizont));
 			if(tempCube[i][2]<=0) {
 				return;
 			}
