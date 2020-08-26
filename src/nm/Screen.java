@@ -23,6 +23,9 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	private int WIDTH,HEIGHT;
 	private double Xmove=0,Ymove=0,Zmove=0;
 	
+	private int rotationX;
+	private int lastX;
+	
 	private BufferedImage img;
 	private int[] cubeSide;
 	private int[] imgPix;
@@ -117,24 +120,12 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 			}
 		}
 		
-		double[][] cube;
-		for(int i=0;i<4;i++) {
-			cube = getCube(-2, 0, 1+i*1.5);
-			if(Xmove<cube[0][0])
-				drawLeftSide(cube);
-			if(Xmove>cube[6][0])
-				drawRightSide(cube);
-			if(Ymove>cube[5][1])
-				drawTopSide(cube);
-			if(Ymove<cube[0][1])
-				drawBottomSide(cube);
-			drawNearSide(cube);
+		for(int i=0;i<5;i++) {
+			for(int j=0;j<5;j++) {
+				makeCube(getCube(-3+j, 0, 1+i),img.getGraphics());
+			}
 		}
 		
-		for(int i=0;i<4;i++) {
-			cube = getCube(1, 0, 1+i*1.5);
-			makeCube(cube,img.getGraphics());
-		}
 		
 		g.drawImage(img, 0, 0, null);
 		
@@ -174,9 +165,23 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		return cube;
 	}
 	
+	private void drawCube(double[][] toDraw) {
+		if(Xmove < toDraw[0][0])
+			drawLeftSide(toDraw);
+		if(Xmove > toDraw[6][0])
+			drawRightSide(toDraw);
+		if(Ymove > toDraw[5][1])
+			drawTopSide(toDraw);
+		if(Ymove < toDraw[0][1])
+			drawBottomSide(toDraw);
+		drawNearSide(toDraw);
+	}
+	
 	private void drawTopSide(double[][] toDraw) {
 		double Xpix=0.0,Ypix=0.0,Zpix=0.0;
-		
+		double dist,a1,a2;
+		double point[] = new double[3];
+		point[0] = toDraw[4][0];
 		for(int yy=0;yy<200;yy++) {
 			for(int xx=0;xx<200;xx++) {
 				if(toDraw[4][2]+yy-Zmove > renderDistance)
@@ -349,12 +354,25 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	private void makeCube(double[][] toDraw,Graphics g) {
 		double[][] tempCube = new double[8][3];
 		
+		//calculate rotation\
+		double dist,a1,a2;
+		for(int i=0;i<8;i++) {
+			dist = Math.sqrt((toDraw[i][0]-Xmove)*(toDraw[i][0]-Xmove)+(toDraw[i][2]-Zmove)*(toDraw[i][2]-Zmove));
+			a1 = Math.asin((toDraw[i][0]-Xmove)/dist)*180/Math.PI;
+			a2 = a1+rotationX;
+			a2 = a2/180*Math.PI;
+			tempCube[i][0] = Xmove-Math.sin(a2)*dist;
+			tempCube[i][1] = toDraw[i][1];
+			tempCube[i][2] = Math.cos(a2)*dist;
+		}
+		
+		
 		//translate Z
-		double horizont = HEIGHT/2;
+		double horizont = HEIGHT/3*4;
 		if(toDraw[3][2]-Zmove > renderDistance)
 			return;
 		for(int i=0;i<8;++i) {
-			tempCube[i][2] = ((horizont+toDraw[i][2]-Zmove)/(horizont));
+			tempCube[i][2] = ((horizont+tempCube[i][2]-Zmove)/(horizont));
 			if(tempCube[i][2]<=0) {
 				return;
 			}
@@ -364,8 +382,8 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		for(int i=0;i<8;++i) {
 			if(tempCube[i][2]==0)
 				continue;
-			tempCube[i][0] = (toDraw[i][0]-Xmove)/tempCube[i][2] + WIDTH/2;
-			tempCube[i][1] = -(toDraw[i][1]-Ymove)/tempCube[i][2] + HEIGHT/2;
+			tempCube[i][0] = (tempCube[i][0]-Xmove)/tempCube[i][2] + WIDTH/2;
+			tempCube[i][1] = -(tempCube[i][1]-Ymove)/tempCube[i][2] + HEIGHT/2;
 		}
 		
 		drawCube(tempCube, g);
@@ -454,14 +472,13 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	@Override
 	public void run() {
 		running = true;
-		while(running) {
-			this.render();
-		}
+		this.render();
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		this.Zmove += e.getWheelRotation()*100;
+		this.render();
 	}
 
 	@Override
@@ -487,6 +504,7 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 		default:
 			break;
 		}
+		this.render();
 	}
 
 	@Override
@@ -496,9 +514,21 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 	}
 
 	@Override
-	public void mouseDragged(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void mousePressed(MouseEvent e) {
+		lastX = e.getX();
+		this.render();
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		lastX = -1;
+		this.render();
+	}
+	
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		this.rotationX = e.getX()-lastX;
+		this.render();
 	}
 
 	@Override
@@ -521,18 +551,6 @@ public class Screen extends Canvas implements Runnable,KeyListener,MouseListener
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
