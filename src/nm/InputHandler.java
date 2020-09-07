@@ -12,23 +12,23 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		screen.Zmove += e.getWheelRotation() * 100;
+		screen.Zmove += ((double)e.getWheelRotation())/3;
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
-			screen.Xmove -= 10;
+			screen.Xmove -= 0.05;
 			break;
 		case KeyEvent.VK_RIGHT:
-			screen.Xmove += 10;
+			screen.Xmove += 0.05;
 			break;
 		case KeyEvent.VK_UP:
-			screen.Ymove += 10;
+			screen.Ymove += 0.05;
 			break;
 		case KeyEvent.VK_DOWN:
-			screen.Ymove -= 10;
+			screen.Ymove -= 0.05;
 			break;
 		case KeyEvent.VK_R:
 			screen.Xmove = 0;
@@ -61,7 +61,8 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		if (screen.lastX == -1)
 			screen.lastX = x;
 		
-		screen.rotationX = (x - screen.lastX) / 3;
+		screen.rotationX += (x - screen.lastX) / 3;
+		screen.lastX = x;
 	}
 
 	@Override

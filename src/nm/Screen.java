@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.*;
+import java.util.function.ToDoubleBiFunction;
 
 import javax.swing.JFrame;
 
@@ -18,6 +20,9 @@ public class Screen extends Canvas implements Runnable{
 
 	public int rotationX;
 	public int lastX;
+	
+	private double tick=0;
+	private double dTick=0;
 
 	private BufferedImage img;
 	private int[] imgPix;
@@ -78,8 +83,13 @@ public class Screen extends Canvas implements Runnable{
 				ZBuffer[j * WIDTH + i] = -1;
 			}
 		}
+		for(int i=0;i<5;++i) {
+			makeCubeFill(getCube(-1.5, 0, 2+i*1.5));
+		}
 		
-		makeCube(getCube(-0.5, -0.5, 2));
+		for(int i=0;i<5;++i) {
+			makeCube(getCube(0.5, 0, 2+i*1.5));
+		}
 		
 		g.drawImage(img, 0, 0, null);
 
@@ -93,16 +103,16 @@ public class Screen extends Canvas implements Runnable{
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Times New Roman", Font.BOLD, 25));
 		g.drawString("" + currFrames + " fps", 10, 35);
-		g.drawString("X: " + Xmove, 10, 55);
-		g.drawString("Y: " + Ymove, 10, 75);
-		g.drawString("Z: " + Zmove, 10, 95);
+		g.drawString("X: " + ((double)Math.round(Xmove*100))/100, 10, 55);
+		g.drawString("Y: " + ((double)Math.round(Ymove*100))/100, 10, 75);
+		g.drawString("Z: " + ((double)Math.round(Zmove*100))/100, 10, 95);
 
 		g.dispose();
 		bs.show();
 	}
 
 	private double[][] getCube(double x, double y, double z) {
-		double cubeSize = 200;
+		double cubeSize = 1;
 		x *= cubeSize;
 		y *= cubeSize;
 		z *= cubeSize;
@@ -120,98 +130,15 @@ public class Screen extends Canvas implements Runnable{
 
 	private void makeCubeFill(double[][] toDraw) {
 		double[][] tempCube = new double[8][3];
-
-		// calculate rotation
-		double dist, a1, a2;
-		for (int i = 0; i < 8; i++) {
-			dist = Math.sqrt(
-					(toDraw[i][0] - Xmove) * (toDraw[i][0] - Xmove) + (toDraw[i][2] - Zmove) * (toDraw[i][2] - Zmove));
-			a1 = -Math.asin((toDraw[i][0] - Xmove) / dist) * 180 / Math.PI;
-			a2 = a1 - rotationX;
-			a2 = a2 / 180 * Math.PI;
-			tempCube[i][0] = Xmove + Math.sin(a2) * dist + Math.cos(a2) * dist;
-			tempCube[i][1] = toDraw[i][1];
-			tempCube[i][2] = Zmove - Math.cos(a2) * dist;// + Math.sin(a2) * dist;
-		}
-
-		// translate Z
-		double horizont = HEIGHT/2;
-		double renderDistance = 2000.0;
-		if (toDraw[3][2] - Zmove > renderDistance)
-			return;
-		for (int i = 0; i < 8; ++i) {
-			tempCube[i][2] = ((horizont + tempCube[i][2] - Zmove) / (horizont));
-			if (tempCube[i][2] <= 0) {
-				return;
-			}
-		}
-
-		// Translate X & Y
-		for (int i = 0; i < 8; ++i) {
-			if (tempCube[i][2] == 0)
-				continue;
-			tempCube[i][0] = (tempCube[i][0] - Xmove) / tempCube[i][2] + WIDTH / 2;
-			tempCube[i][1] = -(tempCube[i][1] - Ymove) / tempCube[i][2] + HEIGHT / 2;
-		}
-		
-	}
-
-	/*private void fillCube(double[][] toDraw) {
-		if (Xmove < toDraw[0][0])
-			drawLeftSide(toDraw);
-		if (Xmove > toDraw[6][0])
-			drawRightSide(toDraw);
-		if (Ymove > toDraw[5][1])
-			drawTopSide(toDraw);
-		if (Ymove < toDraw[0][1])
-			drawBottomSide(toDraw);
-		drawNearSide(toDraw);
-	}*/
-
-	private void drawTriangle(double[] p1, double[] p2, double[] p3, int color) {
-		double minX = Math.min(p1[0], Math.min(p2[0], p3[0]));
-		double minY = Math.min(p1[1], Math.min(p2[1], p3[1]));
-		double maxX = Math.max(p1[0], Math.max(p2[0], p3[0]));
-		double maxY = Math.max(p1[1], Math.max(p2[1], p3[1]));
-
-		for (double x = minX; x <= maxX; x += 1) {
-			for (double y = minY; y <= maxY; y += 1) {
-				if (isInTraingle(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], x, y)) {
-					if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT)
-						imgPix[(int) x + (int) y * WIDTH] = color;
-				}
-			}
-		}
-	}
-
-	private boolean isInTraingle(double x1, double y1, double x2, double y2, double x3, double y3, double x, double y) {
-		double A = area(x1, y1, x2, y2, x3, y3);
-
-		double A1 = area(x, y, x2, y2, x3, y3);
-
-		double A2 = area(x1, y1, x, y, x3, y3);
-
-		double A3 = area(x1, y1, x2, y2, x, y);
-
-		return ((A >= (A1 + A2 + A3 - 5)) && (A <= (A1 + A2 + A3 + 5) ));
-	}
-
-	private double area(double x1, double y1, double x2, double y2, double x3, double y3) {
-		return Math.abs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2.0);
-	}
-
-	private void makeCube(double[][] toDraw) {
-		double[][] tempCube = new double[8][3];
 		
 		double renderDistance = 250.0;
-		double screenz=249.2;
+		double screenz=1.0;
 		
 		double angle = Math.PI/2;
 		double f = 1/Math.tan(angle/2);
 		double zRatio = renderDistance/(renderDistance-screenz);
 		
 		double dist, a1, a2;
-		
 		for (int i = 0; i < 8; i++) {
 			dist = Math.sqrt((toDraw[i][0] - Xmove) * (toDraw[i][0] - Xmove) + (toDraw[i][2] - Zmove) * (toDraw[i][2] - Zmove));
 			a1 = -Math.asin((toDraw[i][0] - Xmove) / dist) * 180 / Math.PI;
@@ -219,7 +146,7 @@ public class Screen extends Canvas implements Runnable{
 			a2 = a2 / 180 * Math.PI;
 			tempCube[i][0] = Xmove - Math.sin(a2) * dist;
 			tempCube[i][1] = toDraw[i][1];
-			tempCube[i][2] = Math.cos(a2) * dist-Zmove;
+			tempCube[i][2] = Zmove + Math.cos(a2) * dist;
 		}
 		
 		for (int i = 0; i < 8; ++i) {
@@ -229,18 +156,189 @@ public class Screen extends Canvas implements Runnable{
 		}
 		
 		for(int i=0; i<8; ++i) {
-			tempCube[i][0] = f*(tempCube[i][0]-Xmove)/tempCube[i][2]+WIDTH/2;
-			tempCube[i][1] = -f*(tempCube[i][1]+Ymove)/tempCube[i][2]+HEIGHT/2;
+			tempCube[i][0] = (f*(tempCube[i][0]-Xmove)/tempCube[i][2])*(WIDTH/2)+WIDTH/2;
+			tempCube[i][1] = (-f*(tempCube[i][1]+Ymove)/tempCube[i][2])*(WIDTH/2)+HEIGHT/2;
 		}
+		
+		fillCube(toDraw,tempCube, getColor(100, 100, 100));
+	}
 
+	private void fillCube(double[][] origin,double[][] toFill, int color) {
+		if(-Ymove>=origin[5][1]) {
+			// 5 6 7 8
+			fillTriangle(toFill[4], toFill[5], toFill[6], color);
+			fillTriangle(toFill[4], toFill[6], toFill[7], color);
+		}
+		if(-Ymove<=origin[0][1]) {
+			fillTriangle(toFill[0], toFill[1], toFill[2], color);
+			fillTriangle(toFill[0], toFill[2], toFill[3], color);
+		}
+		if(Xmove>=origin[1][0]){
+			fillTriangle(toFill[1], toFill[2], toFill[6], color);
+			fillTriangle(toFill[1], toFill[6], toFill[5], color);
+		}
+		if(Xmove<=origin[0][0]){
+			fillTriangle(toFill[0], toFill[4], toFill[7], color);
+			fillTriangle(toFill[0], toFill[7], toFill[3], color);
+		}
+		if(Zmove<=origin[0][2]) {
+			fillTriangle(toFill[0], toFill[1], toFill[5], color);
+			fillTriangle(toFill[0], toFill[5], toFill[4], color);
+		}
+	}
+	
+	private void fillTriangle(double[] p1, double[] p2, double[] p3, int color) {
+		List<double[]> triangle = new ArrayList<>();
+		triangle.add(p1);
+		triangle.add(p2);
+		triangle.add(p3);
+		
+		Collections.sort(triangle, new Comparator<double[]>() {
+			@Override
+			public int compare(double[] o1, double[] o2) {
+				return (int)(o1[1]-o2[1]);
+			}
+		});
+		
+		p1 = triangle.get(0);
+		p2 = triangle.get(1);
+		p3 = triangle.get(2);
+		
+		if((int)p2[1]==(int)p3[1]) {
+			fillBottomFlatTriangle(p1, p2, p3, color);
+		}else if((int)p1[1]==(int)p2[1]) {
+			fillTopFlatTriangle(p1, p2, p3, color);
+		}else {
+			double[] tempPoint = new double[3];
+			
+			double scale = (p2[1]-p1[1])/(p3[1]-p1[1]);
+			
+			tempPoint[0] = p1[0]+(p3[0]-p1[0])*scale;
+			tempPoint[1] = p2[1];
+			
+			fillBottomFlatTriangle(p1, tempPoint, p2, color);
+			fillTopFlatTriangle(tempPoint, p2, p3, color);
+		}
+	}
+	
+	
+	private void fillBottomFlatTriangle(double[] v1, double[] v2, double[] v3,int color){
+		double invslope1 = (v2[0] - v1[0]) / Math.abs((v2[1]-v1[1] == 0) ? 1 : (v2[1]-v1[1] ));
+		double invslope2 = (v3[0] - v1[0]) / Math.abs((v3[1]-v1[1] == 0) ? 1 : (v3[1]-v1[1] ));
+	
+		double curx1 = v1[0];
+		double curx2 = v1[0];
+		
+		double minZ = v1[2];
+		double zStep = (v2[2]-v1[2])/(v2[1]-v1[1]); 
+	
+		for (double scanlineY = v1[1]; scanlineY <= v2[1]; scanlineY++) {
+			if(curx1<curx2) {
+				for(int i=(int)curx1;i<curx2;i++) {
+					if (i >= WIDTH || i <= 0 || scanlineY >= HEIGHT || scanlineY <= 0)
+						continue;
+					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+					if(ZBuffer[i+(int)scanlineY*WIDTH]==-1 || ZBuffer[i+(int)scanlineY*WIDTH]>=minZ+zStep*scanlineY) {
+						imgPix[i+(int)scanlineY*WIDTH]=(color+greyLvl<0)?0:color+greyLvl;
+						ZBuffer[i+(int)scanlineY*WIDTH] = minZ+zStep*scanlineY;
+					}
+				}
+				curx1 += invslope1;
+				curx2 += invslope2;
+			}else {
+				for(int i=(int)curx1;i>=curx2;i--) {
+					if (i >= WIDTH || i <= 0 || scanlineY >= HEIGHT || scanlineY <= 0)
+						continue;
+					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+					if(ZBuffer[i+(int)scanlineY*WIDTH]==-1 || ZBuffer[i+(int)scanlineY*WIDTH]>=minZ+zStep*scanlineY) {
+						imgPix[i+(int)scanlineY*WIDTH]=(color+greyLvl<0)?0:color+greyLvl;
+						ZBuffer[i+(int)scanlineY*WIDTH] = minZ+zStep*scanlineY;
+					}
+				}
+				curx1 += invslope1;
+				curx2 += invslope2;
+			}
+			
+		}
+	}
+
+
+	private void fillTopFlatTriangle(double[] v1, double[] v2, double[] v3, int color) {
+		double invslope1 = (v3[0] - v1[0]) / Math.abs((v3[1]-v1[1] == 0) ? 1 : (v3[1]-v1[1] ));
+		double invslope2 = (v3[0] - v2[0]) / Math.abs((v3[1]-v2[1] == 0) ? 1 : (v3[1]-v2[1] ));
+	
+		double curx1 = v3[0];
+		double curx2 = v3[0];
+		
+		
+		double minZ = v1[2];
+		double zStep = (v3[2]-v1[2])/(v3[1]-v1[1]); 
+		
+		for (double scanlineY = v3[1]; scanlineY > v1[1]; scanlineY--) {
+			if(curx1<curx2) {
+				for(int i=(int)curx1;i<curx2;i++) {
+					if (i >= WIDTH || i <= 0 || scanlineY >= HEIGHT || scanlineY <= 0)
+						continue;
+					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+					if(ZBuffer[i+(int)scanlineY*WIDTH]==-1 || ZBuffer[i+(int)scanlineY*WIDTH]>=minZ+zStep*scanlineY) {
+						imgPix[i+(int)scanlineY*WIDTH]=(color+greyLvl<0)?0:color+greyLvl;
+						ZBuffer[i+(int)scanlineY*WIDTH] = minZ+zStep*scanlineY;
+					}
+				}
+				curx1 -= invslope1;
+				curx2 -= invslope2;
+			}else {
+				for(int i=(int)curx1;i>=curx2;i--) {
+					if (i >= WIDTH || i <= 0 || scanlineY >= HEIGHT || scanlineY <= 0)
+						continue;
+					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+					if(ZBuffer[i+(int)scanlineY*WIDTH]==-1 || ZBuffer[i+(int)scanlineY*WIDTH]>=minZ+zStep*scanlineY) {
+						imgPix[i+(int)scanlineY*WIDTH]=(color+greyLvl<0)?0:color+greyLvl;
+						ZBuffer[i+(int)scanlineY*WIDTH] = minZ+zStep*scanlineY;
+					}
+				}
+				curx1 -= invslope1;
+				curx2 -= invslope2;
+			}
+		}
+	}
+
+	private void makeCube(double[][] toDraw) {
+		double[][] tempCube = new double[8][3];
+		
+		double renderDistance = 250.0;
+		double screenz=1.0;
+		
+		double angle = Math.PI/2;
+		double f = 1/Math.tan(angle/2);
+		double zRatio = renderDistance/(renderDistance-screenz);
+		
+		double dist, a1, a2;
+		for (int i = 0; i < 8; i++) {
+			dist = Math.sqrt((toDraw[i][0] - Xmove) * (toDraw[i][0] - Xmove) + (toDraw[i][2] - Zmove) * (toDraw[i][2] - Zmove));
+			a1 = -Math.asin((toDraw[i][0] - Xmove) / dist) * 180 / Math.PI;
+			a2 = a1 - rotationX;
+			a2 = a2 / 180 * Math.PI;
+			tempCube[i][0] = Xmove - Math.sin(a2) * dist;
+			tempCube[i][1] = toDraw[i][1];
+			tempCube[i][2] = Zmove + Math.cos(a2) * dist;
+		}
+		
+		for (int i = 0; i < 8; ++i) {
+			if(tempCube[i][2]<screenz+Zmove)
+				return;
+			tempCube[i][2] = (tempCube[i][2]-Zmove-screenz)/zRatio;
+		}
+		
+		for(int i=0; i<8; ++i) {
+			tempCube[i][0] = (f*(tempCube[i][0]-Xmove)/tempCube[i][2])*(WIDTH/2)+WIDTH/2;
+			tempCube[i][1] = (-f*(tempCube[i][1]+Ymove)/tempCube[i][2])*(WIDTH/2)+HEIGHT/2;
+		}
+		
 		drawCube(tempCube);
 	}
 
 	private void drawCube(double[][] toDraw) {
-		drawTriangle(toDraw[6], toDraw[2], toDraw[7], Color.BLUE.getRGB());
-		drawTriangle(toDraw[7], toDraw[2], toDraw[3], Color.BLUE.getRGB());
-		drawTriangle(toDraw[0], toDraw[1], toDraw[5], Color.GRAY.getRGB());
-		drawTriangle(toDraw[0], toDraw[5], toDraw[4], Color.GRAY.getRGB());
 		drawLine(toDraw[0], toDraw[1], Color.BLUE.getRGB());// 1 2  X
 		drawLine(toDraw[3], toDraw[0], Color.GREEN.getRGB());// 4 1 Z
 		drawLine(toDraw[4], toDraw[0], Color.RED.getRGB());// 5 1 Y
