@@ -55,9 +55,9 @@ public class Triangles {
 				for(int i=(int)curx1;i<curx2;i++) {
 					if (i >= Screen.WIDTH || i <= 0 || scanlineY >= Screen.HEIGHT || scanlineY <= 0)
 						continue;
-					int greyLvl = getColor((int)(2*(minZ-zStep*scanlineY)), (int)(2*(minZ-zStep*scanlineY)), (int)(2*(minZ-zStep*scanlineY)));
+					
 					if(ZBuffer[i+(int)scanlineY*Screen.WIDTH]==-1 || ZBuffer[i+(int)scanlineY*Screen.WIDTH]>=minZ+zStep*scanlineY) {
-						imgPix[i+(int)scanlineY*Screen.WIDTH]=(color-greyLvl<0)?0:color-greyLvl;
+						imgPix[i+(int)scanlineY*Screen.WIDTH]=color;
 						//ZBuffer[i+(int)scanlineY*Screen.WIDTH] = minZ+zStep*scanlineY;
 					}
 				}
@@ -67,9 +67,9 @@ public class Triangles {
 				for(int i=(int)curx1;i>=curx2;i--) {
 					if (i >= Screen.WIDTH || i <= 0 || scanlineY >= Screen.HEIGHT || scanlineY <= 0)
 						continue;
-					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+					
 					if(ZBuffer[i+(int)scanlineY*Screen.WIDTH]==-1 || ZBuffer[i+(int)scanlineY*Screen.WIDTH]>=minZ+zStep*scanlineY) {
-						imgPix[i+(int)scanlineY*Screen.WIDTH]=(color-greyLvl<0)?0:color-greyLvl;
+						imgPix[i+(int)scanlineY*Screen.WIDTH]=color;
 						//ZBuffer[i+(int)scanlineY*Screen.WIDTH] = minZ+zStep*scanlineY;
 					}
 				}
@@ -97,9 +97,9 @@ public class Triangles {
 				for(int i=(int)curx1;i<curx2;i++) {
 					if (i >= Screen.WIDTH || i <= 0 || scanlineY >= Screen.HEIGHT || scanlineY <= 0)
 						continue;
-					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+
 					if(ZBuffer[i+(int)scanlineY*Screen.WIDTH]==-1 || ZBuffer[i+(int)scanlineY*Screen.WIDTH]>=minZ+zStep*scanlineY) {
-						imgPix[i+(int)scanlineY*Screen.WIDTH]=(color-greyLvl<0)?0:color-greyLvl;
+						imgPix[i+(int)scanlineY*Screen.WIDTH]=color;
 						//ZBuffer[i+(int)scanlineY*Screen.WIDTH] = minZ+zStep*scanlineY;
 					}
 				}
@@ -109,9 +109,9 @@ public class Triangles {
 				for(int i=(int)curx1;i>=curx2;i--) {
 					if (i >= Screen.WIDTH || i <= 0 || scanlineY >= Screen.HEIGHT || scanlineY <= 0)
 						continue;
-					int greyLvl = getColor((int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)), (int)(2*(minZ+zStep*scanlineY)));
+
 					if(ZBuffer[i+(int)scanlineY*Screen.WIDTH]==-1 || ZBuffer[i+(int)scanlineY*Screen.WIDTH]>=minZ+zStep*scanlineY) {
-						imgPix[i+(int)scanlineY*Screen.WIDTH]=(color-greyLvl<0)?0:color-greyLvl;
+						imgPix[i+(int)scanlineY*Screen.WIDTH]=color;
 						//ZBuffer[i+(int)scanlineY*Screen.WIDTH] = minZ+zStep*scanlineY;
 					}
 				}

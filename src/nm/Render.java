@@ -115,25 +115,29 @@ public class Render {
 
 	private void fillCube(double[][] origin,double[][] toFill, int color) {
 		if(-screen.Ymove>=origin[5][1]) {
-			// 5 6 7 8
-			Triangles.fillTriangle(toFill[4], toFill[5], toFill[6], color, imgPix, ZBuffer);
-			Triangles.fillTriangle(toFill[4], toFill[6], toFill[7], color, imgPix, ZBuffer);
+			//TOP
+			Triangles.fillTriangle(toFill[4], toFill[5], toFill[6], getColor(100, 150, 100), imgPix, ZBuffer);
+			Triangles.fillTriangle(toFill[4], toFill[6], toFill[7], getColor(100, 150, 100), imgPix, ZBuffer);
 		}
 		if(-screen.Ymove<=origin[0][1]) {
-			Triangles.fillTriangle(toFill[0], toFill[1], toFill[2], color, imgPix, ZBuffer);
-			Triangles.fillTriangle(toFill[0], toFill[2], toFill[3], color, imgPix, ZBuffer);
+			//BOTTOM
+			Triangles.fillTriangle(toFill[0], toFill[1], toFill[2], getColor(100, 150, 100), imgPix, ZBuffer);
+			Triangles.fillTriangle(toFill[0], toFill[2], toFill[3], getColor(100, 150, 100), imgPix, ZBuffer);
 		}
 		if(screen.Xmove>=origin[1][0]){
-			Triangles.fillTriangle(toFill[1], toFill[2], toFill[6], color, imgPix, ZBuffer);
-			Triangles.fillTriangle(toFill[1], toFill[6], toFill[5], color, imgPix, ZBuffer);
+			//RIGHT
+			Triangles.fillTriangle(toFill[1], toFill[2], toFill[6], getColor(50, 100, 150), imgPix, ZBuffer);
+			Triangles.fillTriangle(toFill[1], toFill[6], toFill[5], getColor(50, 100, 150), imgPix, ZBuffer);
 		}
 		if(screen.Xmove<=origin[0][0]){
-			Triangles.fillTriangle(toFill[0], toFill[4], toFill[7], color, imgPix, ZBuffer);
-			Triangles.fillTriangle(toFill[0], toFill[7], toFill[3], color, imgPix, ZBuffer);
+			//LEFT
+			Triangles.fillTriangle(toFill[0], toFill[4], toFill[7], getColor(50, 100, 150), imgPix, ZBuffer);
+			Triangles.fillTriangle(toFill[0], toFill[7], toFill[3], getColor(50, 100, 150), imgPix, ZBuffer);
 		}
 		if(screen.Zmove<=origin[0][2]) {
-			Triangles.fillTriangle(toFill[0], toFill[1], toFill[5], color, imgPix, ZBuffer);
-			Triangles.fillTriangle(toFill[0], toFill[5], toFill[4], color, imgPix, ZBuffer);
+			//FRONT
+			Triangles.fillTriangle(toFill[0], toFill[1], toFill[5], getColor(150, 150, 150), imgPix, ZBuffer);
+			Triangles.fillTriangle(toFill[0], toFill[5], toFill[4], getColor(150, 150, 150), imgPix, ZBuffer);
 		}
 	}
 	
